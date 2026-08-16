@@ -1,4 +1,7 @@
-const API_URL = (import.meta.env.VITE_API_URL || "https://ai-interview-n2a3.onrender.com").replace(/\/$/, "");
+const API_URL = (
+  import.meta.env.VITE_API_URL ||
+  "https://interview-practice-ai-8ekg.onrender.com"
+).replace(/\/$/, "");
 const API_BASE_URL = `${API_URL}/api`;
 
 const getHeaders = () => {
