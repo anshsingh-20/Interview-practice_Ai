@@ -17,17 +17,26 @@ const allowedOrigins = [
   "https://interview-practice-ai-sn99-8uxairuqx-anshsingh-20s-projects.vercel.app",
   "https://interview-practice-ai-8ekg.onrender.com",
   "http://localhost:5173",
+  "http://127.0.0.1:5173",
   "http://localhost:5000",
+  "http://127.0.0.1:5000",
 ];
 
 // CORS middleware
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+  const isAllowedOrigin =
+    !origin ||
+    allowedOrigins.includes(origin) ||
+    origin.endsWith(".vercel.app") ||
+    origin.endsWith(".onrender.com");
 
-  if (origin && allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  } else if (!origin) {
-    res.setHeader("Access-Control-Allow-Origin", "*");
+  if (isAllowedOrigin) {
+    if (origin) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+    } else {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+    }
   }
 
   res.setHeader(
@@ -41,14 +50,14 @@ app.use((req, res, next) => {
   next();
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`server running on port ${PORT}`);
-});
-
 // middleware
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/interviews", interviewRoutes);
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`server running on port ${PORT}`);
+});
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok", message: "AI interview  API is running" });
@@ -65,6 +74,12 @@ app.use((err, req, res, next) => {
 //database connection
 
 const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+  console.error(
+    "MONGO_URI is missing. Add it to backend/.env before running the server.",
+  );
+}
 
 mongoose
   .connect(MONGO_URI)
