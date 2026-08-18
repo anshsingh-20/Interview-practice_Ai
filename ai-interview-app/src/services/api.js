@@ -10,7 +10,7 @@ const resolveApiUrl = () => {
     }
   }
 
-  return "https://interview-practice-ai-8ekg.onrender.com";
+  return "https://interview-practice-ai-1.onrender.com";
 };
 
 const API_URL = resolveApiUrl();
