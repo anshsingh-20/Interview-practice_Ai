@@ -1,5 +1,6 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import User from "../models/user.js";
 import { protect } from "../middleware/auth.js";
 
@@ -7,6 +8,16 @@ const router = express.Router();
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "10d" });
+};
+
+const ensureDatabaseReady = (res) => {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      message:
+        "Database is currently unavailable. Please try again in a moment.",
+    });
+  }
+  return null;
 };
 
 router.post("/register", async (req, res, next) => {
@@ -22,6 +33,12 @@ router.post("/register", async (req, res, next) => {
       console.log("missing fields");
       return res.status(400).json({ message: "please provide all fields" });
     }
+
+    const dbCheck = ensureDatabaseReady(res);
+    if (dbCheck) {
+      return dbCheck;
+    }
+
     console.log("checking if user exists");
     const userExists = await User.findOne({ $or: [{ username }, { email }] });
     if (userExists) {

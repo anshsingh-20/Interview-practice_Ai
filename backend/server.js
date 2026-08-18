@@ -54,12 +54,8 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/interviews", interviewRoutes);
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`server running on port ${PORT}`);
-});
-
 app.get("/health", (req, res) => {
-  res.json({ status: "ok", message: "AI interview  API is running" });
+  res.json({ status: "ok", message: "AI interview API is running" });
 });
 
 // error handler
@@ -80,11 +76,35 @@ if (!MONGO_URI) {
   );
 }
 
-mongoose
-  .connect(MONGO_URI)
-  .then(() => {
-    console.log("database connected successfully");
-  })
-  .catch((error) => {
-    console.log("database connection failed", error);
+const startServer = async () => {
+  if (!MONGO_URI) {
+    console.error(
+      "MONGO_URI is missing. Add it to backend/.env before running the server.",
+    );
+  }
+
+  try {
+    if (MONGO_URI) {
+      await mongoose.connect(MONGO_URI, {
+        serverSelectionTimeoutMS: 10000,
+      });
+      console.log("database connected successfully");
+    }
+  } catch (error) {
+    console.error("database connection failed", error.message);
+  }
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`server running on port ${PORT}`);
   });
+};
+
+mongoose.connection.on("connected", () => {
+  console.log("MongoDB connected");
+});
+
+mongoose.connection.on("error", (error) => {
+  console.error("MongoDB connection error:", error.message);
+});
+
+startServer();
