@@ -1,4 +1,3 @@
-
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
@@ -15,13 +14,12 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 const app = express();
 const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
-  "https://interview-practice-ai-sn99-8uxairuqx-anshsingh-20s-projects.vercel.app",
-  "https://interview-practice-ai-8ekg.onrender.com",
+  process.env.FRONTEND_URL,
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "http://localhost:5000",
   "http://127.0.0.1:5000",
-];
+].filter(Boolean);
 
 // CORS middleware
 app.use((req, res, next) => {
@@ -29,8 +27,8 @@ app.use((req, res, next) => {
   const isAllowedOrigin =
     !origin ||
     allowedOrigins.includes(origin) ||
-    origin.endsWith(".vercel.app") ||
-    origin.endsWith(".onrender.com");
+    /https?:\/\/.*\.vercel\.app$/i.test(origin || "") ||
+    /https?:\/\/.*\.onrender\.com$/i.test(origin || "");
 
   if (isAllowedOrigin) {
     if (origin) {
